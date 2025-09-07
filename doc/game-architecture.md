@@ -1,4 +1,4 @@
-# Game Plan
+# Game Architecture Definitions
 
 ## The Game description
 This multiplayer game is built on an authoritative server architecture using Node.js, Express, and Socket.IO to manage the true game state and enforce rules in real-time. Clients, developed from a single codebase using React Native for both Android and web (via `react-native-web`), connect via Socket.IO to send player actions and receive state updates. To ensure low-latency, responsive gameplay, the state for active game matches is managed entirely in-memory on the server, while a persistent database handles player accounts and other non-session data.
@@ -61,7 +61,7 @@ This is the protocol that the client and server use to talk to each other in rea
 ### Protocol Efficiency: Delta Updates
 *   **Problem:** Broadcasting the entire game state on every turn is simple but inefficient. As the game state grows, this consumes unnecessary bandwidth and can slow down updates.
 
-*   **Suggestion: Implement Delta/Diff Updates:** Instead of sending the entire state, calculate and send only what has changed. For example, instead of sending the whole `gameState` object, send a discrete event like `{ event: 'CARD_PLAYED', player: 'p1', card: 'king_of_hearts', nextPlayer: 'p2' }`. The client's state store (Zustand/Redux) is then responsible for applying this "patch" to its local state. This drastically reduces payload size. To support this, you should **define a strict event schema** in your `src/types/` directory for all client-to-server and server-to-client events.
+*   **Suggestion: Implement Delta/Diff Updates:** Instead of sending the entire state, calculate and send only what has changed. For example, instead of sending the whole `gameState` object, send a discrete event like `{ event: 'CARD_PLAYED', player: 'p1', card: 'king_of_hearts', nextPlayer: 'p2' }`. The client's state store (Zustand) is then responsible for applying this "patch" to its local state. This drastically reduces payload size. To support this, you should **define a strict event schema** in your `src/types/` directory for all client-to-server and server-to-client events.
 
 ### Handling Latency: Client-Side Prediction
 *   **Problem:** Network latency can make the game feel sluggish, as a player must wait for a full server round-trip before their UI updates.
@@ -192,7 +192,7 @@ src/
 │   ├── LobbyScreen.tsx
 │   └── GameScreen.tsx
 │
-├── state/          # Global state management (e.g., Zustand, Redux, Context).
+├── state/          # Global state management (Zustand).
 │   ├── gameStore.ts  # State slice for the current game match.
 │   ├── userStore.ts  # State slice for user authentication and profile.
 │   └── index.ts      # Combines stores/reducers.
